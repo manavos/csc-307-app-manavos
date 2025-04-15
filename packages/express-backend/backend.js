@@ -58,6 +58,29 @@ app.get("/users", (req, res) => { //  http://localhost:8000/users
   }
 });
 
+//define more specific routes before general ones!!
+const findUserByNameandJob = (name, job) =>
+  users["users_list"].filter((user) => user["name"] === name && user["job"] === job);
+
+app.get("/users/search", (req, res) => {
+  const {name, job} = req.query;
+
+  if (!name || !job) {
+    return res.status(400).send("Both name and job are required in query.");
+  }
+  console.log("Query params:", req.query);
+
+  let result = findUserByNameandJob(name, job);
+
+  console.log("Search result:", result);
+
+  if (result.length === 0) {
+    res.status(404).send("Resource not found.");
+  } else {
+    res.send(result);
+  }
+});
+
 const findUserById = (id) =>
   users["users_list"].find((user) => user["id"] === id);
 
@@ -81,6 +104,24 @@ app.post("/users", (req, res) => {
   addUser(userToAdd);
   res.send();
 });
+
+const deleteUserByID = (id) => {
+  const originalLength = users["users_list"].length;
+  users["users_list"] = users["users_list"].filter(user => user.id !== id);
+  return users["users_list"].length < originalLength; // true if something was deleted
+};
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params["id"];
+  const wasDeleted = deleteUserByID(id);
+
+  if (!wasDeleted) {
+    res.status(404).send("User not found.");
+  } else {
+    res.send();
+  }
+});
+
 
 
 app.listen(port, () => {
