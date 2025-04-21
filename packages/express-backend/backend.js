@@ -39,6 +39,10 @@ const users = {
   ]
 };
 
+function generateId() {
+  return Math.floor(Math.random() * 1000000); // or use Date.now()
+}
+
 app.get("/", (req, res) => { // http://localhost:8000/ 
   res.send("Hello World!");
 });
@@ -104,8 +108,9 @@ const addUser = (user) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
+  userToAdd.id = generateId()
   addUser(userToAdd);
-  res.send();
+  res.status(201).json({ message: "User created", user: userToAdd });
 });
 
 const deleteUserByID = (id) => {
