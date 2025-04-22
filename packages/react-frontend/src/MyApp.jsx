@@ -14,11 +14,21 @@ import Form from "./Form"
         });
     }, []);
 
-    function removeOneCharacter(index) {
-        const updated = characters.filter((character, i) => {
-            return i !== index;
-        });
-        setCharacters(updated);
+    function removeOneCharacter(id) {
+      fetch(`http://localhost:8000/users/${id}`, {
+        method: 'DELETE'
+      })
+      .then((res) => {
+        if (res.status === 204) {
+          const updated = characters.filter(character => character.id !== id);
+          setCharacters(updated);
+        } else {
+          console.log("Error deleting character", res);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     }
 
     function postUser(person) {
@@ -35,7 +45,14 @@ import Form from "./Form"
 
     function updateList(person) {
       postUser(person)
-        .then(() => setCharacters([...characters, person]))
+        .then((res) =>
+          res.status === 201
+            ? res.json()
+            : Promise.reject(`Unexpected status code: ${res.status}`)
+        )
+        .then((newUser) => {
+          setCharacters((prevState) => [...prevState, newUser.user]);
+        })
         .catch((error) => {
           console.log(error);
         });
