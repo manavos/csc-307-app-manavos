@@ -27,6 +27,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+//find by name/job
 app.get("/users", (req, res) => {
   const { name, job } = req.query;
 
@@ -48,7 +49,7 @@ app.get("/users", (req, res) => {
     });
 });
 
-
+//find user by id
 app.get("/users/:id", (req, res) => {
   const id = req.params["id"];
   userService
@@ -66,7 +67,7 @@ app.get("/users/:id", (req, res) => {
     });
 });
 
-// Route to add a new user
+//add a new user
 app.post("/users", (req, res) => {
   const user = req.body;
 
@@ -74,6 +75,24 @@ app.post("/users", (req, res) => {
     .addUser(user)
     .then((savedUser) => {
       res.status(201).json(savedUser); // Send the saved user in the response
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).send("An error occurred in the server.");
+    });
+});
+
+//delete user
+app.delete("/users/:id", (req, res) => {
+  const id = req.params["id"];
+  userService
+    .deleteUserbyID(id)
+    .then((result) => {
+      if (!result) {
+        res.status(404).send("User not found.");
+      } else {
+        res.json(result); 
+      }
     })
     .catch((error) => {
       console.log(error);
