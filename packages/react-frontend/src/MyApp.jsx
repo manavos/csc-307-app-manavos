@@ -15,15 +15,15 @@ import Form from "./Form"
     }, []);
 
     function removeOneCharacter(id) {
+
       fetch(`http://localhost:8000/users/${id}`, {
         method: 'DELETE'
       })
-      .then((res) => {
-        if (res.status === 204) {
-          const updated = characters.filter(character => character.id !== id);
-          setCharacters(updated);
-        } else {
-          console.log("Error deleting character", res);
+      .then((res) => res.json()) //added so its in json format
+      .then((json) => {
+        if (json.deletedCount === 1) {
+          const updated = characters.filter(character => character._id !== id);
+          setCharacters(updated);    // update the frontend
         }
       })
       .catch((error) => {
@@ -50,9 +50,12 @@ import Form from "./Form"
             ? res.json()
             : Promise.reject(`Unexpected status code: ${res.status}`)
         )
-        .then((newUser) => {
-          setCharacters((prevState) => [...prevState, newUser.user]);
+        .then(() => {
+          return fetchUsers();
         })
+        //added 2 lines so table shows when submit it pressed
+        .then((res) => res.json())
+        .then((json) => setCharacters(json["users_list"]))
         .catch((error) => {
           console.log(error);
         });
